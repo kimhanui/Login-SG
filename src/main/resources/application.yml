@@ -1,0 +1,23 @@
+spring:
+  profiles:
+    activate: local
+    include: auth
+
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: root
+    password: mariadb
+    url: jdbc:mariadb://localhost:3306/test?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        format_sql: true
+    defer-datasource-initialization: true #Spring Boot 2.5 변경사항
+#  sql:
+#    init:
+#      mode: always
