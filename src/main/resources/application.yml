@@ -1,6 +1,8 @@
 spring:
   profiles:
-    active: local
+    activate: local
+    include: auth
+
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     username: root

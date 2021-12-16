@@ -8,6 +8,7 @@ import com.smilegate.loginsg.web.dto.LoginResponseDto;
 import com.smilegate.loginsg.web.dto.RegisterRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,8 +19,9 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
     private final JWTProvider jwtProvider;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     private static final String SUCCESS_RESPONSE = "success";
     private static final char[] ALLOWED_SYMBOLS = new char[]{'!', '@', '#', '%', '^', '&', '*'};
 
@@ -29,7 +31,8 @@ public class UserService {
         if (user.isPresent()) throw new IllegalArgumentException("User is already exist");
         if (!isValidatePassword(dto.getPassword())) throw new IllegalArgumentException("Password is not valid");
 
-        userRepository.save(User.createMember(dto));
+        String encrypted = passwordEncoder.encode(dto.getPassword());
+        userRepository.save(User.createMember(dto, encrypted));
         return SUCCESS_RESPONSE;
     }
 

@@ -23,17 +23,23 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Email @Column(unique = true)
+    @Email @Column(length = 25, unique = true)
     private String email;
+
+    @Column(columnDefinition="char(60)")
     private String password;
+
+    @Column(length = 10)
     private String name;
+
+    @Enumerated(EnumType.STRING) @Column(columnDefinition = "char(6)")
     private Role role;
 
-    public static User createMember(RegisterRequestDto dto) {
+    public static User createMember(RegisterRequestDto dto, String encrypted) {
         return User.builder()
                 .email(dto.getEmail())
                 .name(dto.getName())
-                .password(dto.getPassword())
+                .password(encrypted)
                 .role(Role.MEMBER)
                 .build();
     }
