@@ -21,4 +21,10 @@ public class UserController {
         log.info("registerUser:" + dto.toString());
         return userService.registerUser(dto);
     }
+
+    @GetMapping("/login")
+    public LoginResponseDto login(@RequestBody LoginRequestDto dto) throws IllegalArgumentException, NullPointerException {
+        log.info("loginUser:" + dto.toString());
+        return userService.loginUser(dto);
+    }
 }

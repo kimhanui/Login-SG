@@ -36,6 +36,17 @@ public class UserService {
         return SUCCESS_RESPONSE;
     }
 
+
+    @Transactional
+    public LoginResponseDto loginUser(LoginRequestDto dto) throws NullPointerException {
+        Optional<User> user = userRepository.findByEmail(dto.getEmail());
+        if (user.isEmpty()) throw new NullPointerException("User not found");
+        // jwt 발급
+        String jwt = jwtProvider.createToken(dto.getEmail());
+        log.info(String.format("%s jwt=%s", dto.getEmail(), jwt));
+        return new LoginResponseDto(dto.getEmail(), jwt, user.get().getRole().toString());
+    }
+
     /**
      * condition:
      * - at least 4 words
