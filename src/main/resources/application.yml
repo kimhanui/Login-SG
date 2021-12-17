@@ -18,6 +18,6 @@ spring:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
         format_sql: true
     defer-datasource-initialization: true #Spring Boot 2.5 변경사항
-#  sql:
-#    init:
-#      mode: always
+  sql:
+    init:
+      mode: always

@@ -15,7 +15,7 @@ import javax.validation.constraints.NotBlank;
 public class RegisterRequestDto {
 
     @Email
-    private String email; // id
+    private String email;
 
     @Min(4) @Max(12) @NotBlank
     private String password;

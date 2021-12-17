@@ -55,7 +55,7 @@ public class UserService {
     /**
      * condition:
      * - at least 4 words
-     * - only & all contains: alphabet(small or large), special symbol('!','@','#','%','^','&','*'), digit(0~9)
+     * - only contains these: alphabet(small or large), special symbol('!','@','#','%','^','&','*'), digit(0~9)
      */
     private boolean isValidPassword(String password) {
         int size = password.length();
