@@ -1,9 +1,12 @@
 package com.smilegate.loginsg.config.jwt;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.smilegate.loginsg.ExceptionUtil.JwtValidationException;
+import io.jsonwebtoken.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,9 +14,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JWTProvider {
 
@@ -24,8 +29,11 @@ public class JWTProvider {
     private final long REFRESH_VALID_TIME;
 
     @Autowired
-    public JWTProvider(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.access-valid-time}")long accessValidTime, @Value("${jwt.refresh-valid-time}")long refreshValidTime,
+    public JWTProvider(@Value("${jwt.secret-key}") String secretKey,
+                       @Value("${jwt.access-valid-time}") long accessValidTime,
+                       @Value("${jwt.refresh-valid-time}") long refreshValidTime,
                        UserDetailsService userDetailsService) {
+        log.info("JWTProvider autowired");
         this.SECRET_KEY = Base64.getEncoder().encodeToString(secretKey.getBytes());
         this.ACCESS_VALID_TIME = accessValidTime;
         this.REFRESH_VALID_TIME = refreshValidTime;
@@ -69,7 +77,38 @@ public class JWTProvider {
     /**
      * get unique data to find user
      */
-    private String getPk(String token){
+    private String getPk(String token) {
         return (String) Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().get("email");
+    }
+
+    /**
+     * @throws NullPointerException header에 AUTHORIZATION 키 없으면 발생
+     */
+    public String resolveToken(HttpServletRequest request) throws NullPointerException {
+        String token = null;
+        try {
+            token = request.getHeader(HttpHeaders.AUTHORIZATION).substring(JWT_PREFIX.length());
+        } catch (NullPointerException e) {
+            log.warn(e.getMessage());
+            throw new NullPointerException("JWT is not included in request");
+        }
+        return token;
+    }
+
+    public boolean validateToken(String jwtToken) throws RuntimeException {
+        log.info("JWTProvider validateToken: " +jwtToken);
+        try {
+            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(jwtToken);
+        } catch (ExpiredJwtException e) {
+            // jwt가 만료됨
+            throw new JwtValidationException("JWT is expired", e, HttpStatus.REQUEST_TIMEOUT);
+        } catch (UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
+            // Claims에 담았던 인자의 키밸류들이 아님
+            throw new JwtValidationException("JWT's type or value is invalid", e, HttpStatus.UNAUTHORIZED);
+        } catch (SignatureException e) {
+            // signature이 유효하지 않음
+            throw new JwtValidationException("JWT's signature is not invalid", e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return true;
     }
 }
