@@ -29,8 +29,8 @@ public class UserService {
     public String registerUser(RegisterRequestDto dto) throws IllegalArgumentException {
         Optional<User> user = userRepository.findByEmail(dto.getEmail());
         if (user.isPresent()) throw new IllegalArgumentException("User is already exist");
-        if (!isValidatePassword(dto.getPassword())) throw new IllegalArgumentException("Password is not valid");
-
+        if (!isValidPassword(dto.getPassword())) throw new IllegalArgumentException("Password is not valid");
+        // 비밀번호 암호화
         String encrypted = passwordEncoder.encode(dto.getPassword());
         userRepository.save(User.createMember(dto, encrypted));
         return SUCCESS_RESPONSE;
@@ -38,13 +38,18 @@ public class UserService {
 
 
     @Transactional
-    public LoginResponseDto loginUser(LoginRequestDto dto) throws NullPointerException {
-        Optional<User> user = userRepository.findByEmail(dto.getEmail());
-        if (user.isEmpty()) throw new NullPointerException("User not found");
+    public LoginResponseDto loginUser(LoginRequestDto dto) throws NullPointerException,IllegalArgumentException {
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(()-> new NullPointerException("User not found"));
+        // 비밀번호 검증
+        if(!passwordEncoder.matches(dto.getPassword(), user.getPassword())){
+            throw new IllegalArgumentException("Password not correct");
+        }
         // jwt 발급
-        String jwt = jwtProvider.createToken(dto.getEmail());
-        log.info(String.format("%s jwt=%s", dto.getEmail(), jwt));
-        return new LoginResponseDto(dto.getEmail(), jwt, user.get().getRole().toString());
+        String accessToken = jwtProvider.createAccessToken(dto.getEmail());
+        String refreshToken = jwtProvider.createRefreshToken();
+        user.updateRefreshToken(refreshToken);
+        return new LoginResponseDto(dto.getEmail(), accessToken, user.getRole().toString());
     }
 
     /**
@@ -52,7 +57,7 @@ public class UserService {
      * - at least 4 words
      * - only & all contains: alphabet(small or large), special symbol('!','@','#','%','^','&','*'), digit(0~9)
      */
-    private boolean isValidatePassword(String password) {
+    private boolean isValidPassword(String password) {
         int size = password.length();
 
         if (size < 4) return false;

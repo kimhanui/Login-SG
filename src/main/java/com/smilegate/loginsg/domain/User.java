@@ -35,6 +35,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING) @Column(columnDefinition = "char(6)")
     private Role role;
 
+    private String refreshToken;
+
     public static User createMember(RegisterRequestDto dto, String encrypted) {
         return User.builder()
                 .email(dto.getEmail())
@@ -42,6 +44,10 @@ public class User implements UserDetails {
                 .password(encrypted)
                 .role(Role.MEMBER)
                 .build();
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     @Builder
