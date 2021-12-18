@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +31,9 @@ public class User implements UserDetails {
     @Column(columnDefinition="char(60)")
     private String password;
 
+    @Min(0) @Max(3)
+    private short wrongCnt;
+
     @Column(length = 10)
     private String name;
 
@@ -41,6 +46,7 @@ public class User implements UserDetails {
         return User.builder()
                 .email(dto.getEmail())
                 .name(dto.getName())
+                .wrongCnt((short) 0)
                 .password(encrypted)
                 .role(Role.MEMBER)
                 .build();
@@ -49,11 +55,14 @@ public class User implements UserDetails {
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
+    public void resetWrongCnt() {this.wrongCnt = (short) 0;}
+    public void addWrongCnt() {this.wrongCnt ++;}
 
     @Builder
-    public User(String email, String name,String password, Role role) {
+    public User(String email, String name,String password, short wrongCnt, Role role) {
         this.email = email;
         this.name = name;
+        this.wrongCnt = wrongCnt;
         this.password = password;
         this.role = role;
     }

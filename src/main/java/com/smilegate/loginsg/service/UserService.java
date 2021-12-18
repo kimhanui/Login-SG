@@ -3,11 +3,14 @@ package com.smilegate.loginsg.service;
 import com.smilegate.loginsg.config.jwt.JWTProvider;
 import com.smilegate.loginsg.domain.User;
 import com.smilegate.loginsg.domain.UserRepository;
+import com.smilegate.loginsg.utils.Mailing;
 import com.smilegate.loginsg.web.dto.LoginRequestDto;
 import com.smilegate.loginsg.web.dto.LoginResponseDto;
 import com.smilegate.loginsg.web.dto.RegisterRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,11 +41,11 @@ public class UserService {
 
 
     @Transactional
-    public LoginResponseDto loginUser(LoginRequestDto dto) throws NullPointerException,IllegalArgumentException {
+    public LoginResponseDto loginUser(LoginRequestDto dto) throws NullPointerException, IllegalArgumentException {
         User user = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(()-> new NullPointerException("User not found"));
+                .orElseThrow(() -> new NullPointerException("User not found"));
         // 비밀번호 검증
-        if(!passwordEncoder.matches(dto.getPassword(), user.getPassword())){
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Password not correct");
         }
         // jwt 발급
@@ -50,6 +53,31 @@ public class UserService {
         String refreshToken = jwtProvider.createRefreshToken();
         user.updateRefreshToken(refreshToken);
         return new LoginResponseDto(dto.getEmail(), accessToken, user.getRole().toString());
+    }
+
+
+    @Transactional
+    public String tryToMatchMyPassword(String rawPassword) {
+        String result = "";
+        UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+                .getContext().getAuthentication();
+        String email = ((User) authentication.getDetails()).getEmail();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NullPointerException("User not found"));
+
+        // wrongCnt 확인 후 비밀번호 맞추기 시도
+        if (user.getWrongCnt() <= 3) {
+            if ((passwordEncoder.matches(rawPassword, user.getPassword()))) {
+                user.resetWrongCnt();
+                result = "correct";
+            } else {
+                user.addWrongCnt();
+                result = "incorrect";
+            }
+        } else {
+            Mailing.sendMailForResetPW(email);
+            result = "exceeded try times so mailing";
+        }
+        return result;
     }
 
     /**

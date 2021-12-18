@@ -27,4 +27,10 @@ public class UserController {
         log.info("loginUser:" + dto.toString());
         return userService.loginUser(dto);
     }
+
+    @GetMapping("/validatepw")
+    public String tryToMatchMyPassword(String password) {
+        log.info("password:", password);
+        return userService.tryToMatchMyPassword(password);
+    }
 }

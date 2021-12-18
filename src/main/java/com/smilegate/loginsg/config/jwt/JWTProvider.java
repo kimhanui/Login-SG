@@ -33,7 +33,6 @@ public class JWTProvider {
                        @Value("${jwt.access-valid-time}") long accessValidTime,
                        @Value("${jwt.refresh-valid-time}") long refreshValidTime,
                        UserDetailsService userDetailsService) {
-        log.info("JWTProvider autowired");
         this.SECRET_KEY = Base64.getEncoder().encodeToString(secretKey.getBytes());
         this.ACCESS_VALID_TIME = accessValidTime;
         this.REFRESH_VALID_TIME = refreshValidTime;
@@ -68,10 +67,11 @@ public class JWTProvider {
 
     /**
      * JWT -> Authentication for Spring Boot
+     * - credentials: 로그인 인증 후엔 값을 제거해서 탈취를 막는다고 함
      */
     public Authentication getAuthentication(String token) throws UsernameNotFoundException {
         UserDetails userDetails = userDetailsService.loadUserByUsername(this.getPk(token));
-        return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
     /**

@@ -21,3 +21,10 @@ spring:
   sql:
     init:
       mode: always
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${mail.sender.username}
+    password: ${mail.sender.password}
+    properties.mail.smtp.auth: true
+    properties.mail.smtp.starttls.enable: true
