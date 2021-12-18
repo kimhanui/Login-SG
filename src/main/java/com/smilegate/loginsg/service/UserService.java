@@ -3,14 +3,11 @@ package com.smilegate.loginsg.service;
 import com.smilegate.loginsg.config.jwt.JWTProvider;
 import com.smilegate.loginsg.domain.User;
 import com.smilegate.loginsg.domain.UserRepository;
-import com.smilegate.loginsg.utils.Mailing;
-import com.smilegate.loginsg.web.dto.LoginRequestDto;
-import com.smilegate.loginsg.web.dto.LoginResponseDto;
+import com.smilegate.loginsg.web.dto.VerifyRequestDto;
+import com.smilegate.loginsg.web.dto.VerifyResponseDto;
 import com.smilegate.loginsg.web.dto.RegisterRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +22,7 @@ public class UserService {
     private final JWTProvider jwtProvider;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MailingServivce mailingServivce;
     private static final String SUCCESS_RESPONSE = "success";
     private static final char[] ALLOWED_SYMBOLS = new char[]{'!', '@', '#', '%', '^', '&', '*'};
 
@@ -39,45 +37,30 @@ public class UserService {
         return SUCCESS_RESPONSE;
     }
 
-
     @Transactional
-    public LoginResponseDto loginUser(LoginRequestDto dto) throws NullPointerException, IllegalArgumentException {
+    public VerifyResponseDto loginUser(VerifyRequestDto dto) throws NullPointerException, IllegalArgumentException {
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new NullPointerException("User not found"));
-        // 비밀번호 검증
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Password not correct");
+        // 비밀번호 검증 - 3회
+        if (user.getWrongCnt() <= 3) {
+            if ((passwordEncoder.matches(dto.getPassword(), user.getPassword()))) {
+                user.resetWrongCnt();
+            } else {
+                user.addWrongCnt();
+                throw new IllegalArgumentException("Password not correct");
+            }
         }
         // jwt 발급
         String accessToken = jwtProvider.createAccessToken(dto.getEmail());
         String refreshToken = jwtProvider.createRefreshToken();
         user.updateRefreshToken(refreshToken);
-        return new LoginResponseDto(dto.getEmail(), accessToken, user.getRole().toString());
+        return new VerifyResponseDto(dto.getEmail(), accessToken, user.getRole().toString());
     }
 
-
     @Transactional
-    public String tryToMatchMyPassword(String rawPassword) {
-        String result = "";
-        UsernamePasswordAuthenticationToken authentication = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-                .getContext().getAuthentication();
-        String email = ((User) authentication.getDetails()).getEmail();
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new NullPointerException("User not found"));
-
-        // wrongCnt 확인 후 비밀번호 맞추기 시도
-        if (user.getWrongCnt() <= 3) {
-            if ((passwordEncoder.matches(rawPassword, user.getPassword()))) {
-                user.resetWrongCnt();
-                result = "correct";
-            } else {
-                user.addWrongCnt();
-                result = "incorrect";
-            }
-        } else {
-            Mailing.sendMailForResetPW(email);
-            result = "exceeded try times so mailing";
-        }
-        return result;
+    public String tryToMatchMyPassword(VerifyRequestDto dto) {
+        mailingServivce.sendMailForResetPW(dto.getEmail());
+        return "exceeded try times. wait for a verification mail";
     }
 
     /**

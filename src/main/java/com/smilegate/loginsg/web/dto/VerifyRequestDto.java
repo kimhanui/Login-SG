@@ -7,12 +7,15 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
+/**
+ * cf. login, find password
+ */
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
-public class LoginRequestDto {
+public class VerifyRequestDto {
 
     @Email
     private String email;

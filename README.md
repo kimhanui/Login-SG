@@ -9,3 +9,17 @@
 얻은 것
 - `SecurityConfig.java`의 security chain filter 의 구성을 다 이해했는가?
 - 에러핸들링(dispatcherServlet in, out), 에러 응답 format 통일
+
+### To Try
+
+application-auth.yml 생성후, 아래 property를 채워주세요.
+```yaml
+jwt:
+  secret-key: 
+  access-valid-time:
+  refresh-valid-time:
+mail:
+  sender:
+    username:
+    password:
+```

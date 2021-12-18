@@ -1,8 +1,8 @@
 package com.smilegate.loginsg.web;
 
 import com.smilegate.loginsg.service.UserService;
-import com.smilegate.loginsg.web.dto.LoginRequestDto;
-import com.smilegate.loginsg.web.dto.LoginResponseDto;
+import com.smilegate.loginsg.web.dto.VerifyRequestDto;
+import com.smilegate.loginsg.web.dto.VerifyResponseDto;
 import com.smilegate.loginsg.web.dto.RegisterRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,14 +23,14 @@ public class UserController {
     }
 
     @GetMapping("/login")
-    public LoginResponseDto login(@RequestBody LoginRequestDto dto) throws IllegalArgumentException, NullPointerException {
+    public VerifyResponseDto login(@RequestBody VerifyRequestDto dto) throws IllegalArgumentException, NullPointerException {
         log.info("loginUser:" + dto.toString());
         return userService.loginUser(dto);
     }
 
-    @GetMapping("/validatepw")
-    public String tryToMatchMyPassword(String password) {
-        log.info("password:", password);
-        return userService.tryToMatchMyPassword(password);
+    @GetMapping("/matchpw")
+    public String tryToMatchMyPassword(@RequestBody VerifyRequestDto dto) {
+        log.info("password:", dto.getPassword());
+        return userService.tryToMatchMyPassword(dto);
     }
 }
