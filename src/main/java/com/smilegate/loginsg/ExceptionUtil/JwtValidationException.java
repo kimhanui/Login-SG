@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public class JwtValidationException extends RuntimeException {
 
-    private HttpStatus status;
+    private HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
     public JwtValidationException() {
         super();
@@ -14,6 +14,11 @@ public class JwtValidationException extends RuntimeException {
 
     public JwtValidationException(String message) {
         super(message);
+    }
+
+    public JwtValidationException(String message, HttpStatus status) {
+        super(message);
+        this.status = status;
     }
 
     public JwtValidationException(String message, Throwable cause, HttpStatus status) {

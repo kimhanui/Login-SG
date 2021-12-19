@@ -3,8 +3,9 @@ package com.smilegate.loginsg.config;
 import com.smilegate.loginsg.config.jwt.CustomFilterExceptionHandler;
 import com.smilegate.loginsg.config.jwt.JWTAuthticationFilter;
 import com.smilegate.loginsg.config.jwt.JWTProvider;
+import com.smilegate.loginsg.config.jwt.JwtAccessDeniedHandler;
 import com.smilegate.loginsg.domain.Role;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,18 +17,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@RequiredArgsConstructor
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JWTProvider jwtProvider;
     private final CustomFilterExceptionHandler customFilterExceptionHandler;
-
-    @Autowired
-    public SecurityConfig(JWTProvider jwtProvider, CustomFilterExceptionHandler customFilterExceptionHandler) {
-        this.jwtProvider = jwtProvider;
-        this.customFilterExceptionHandler = customFilterExceptionHandler;
-    }
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -50,8 +47,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
+            .exceptionHandling()
+            .accessDeniedHandler(jwtAccessDeniedHandler) //권한별 접근 제어
+        .and()
             .authorizeRequests()
-            .antMatchers("/user/login", "/user/register").anonymous()
+            .antMatchers("/user/register", "/user/login","/user/reissueactoken", "/user/mailpw").anonymous()
+            .antMatchers("/user/logout").authenticated()
             .antMatchers("/admin/**").hasAuthority(Role.ADMIN.toString())
             .antMatchers("/**").permitAll()
         .and()

@@ -18,6 +18,13 @@ spring:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
         format_sql: true
     defer-datasource-initialization: true #Spring Boot 2.5 변경사항
-#  sql:
-#    init:
-#      mode: always
+  sql:
+    init:
+      mode: always
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${my.mail.sender.username}
+    password: ${my.mail.sender.password}
+    properties.mail.smtp.auth: true
+    properties.mail.smtp.starttls.enable: true

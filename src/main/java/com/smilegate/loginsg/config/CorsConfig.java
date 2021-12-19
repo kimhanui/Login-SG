@@ -14,7 +14,7 @@ public class CorsConfig implements WebMvcConfigurer {
 
     private final long MAX_AGE_SECS;
 
-    public CorsConfig(@Value("{jwt.access-valid-time}") long max_age_secs) {
+    public CorsConfig(@Value("${jwt.access-valid-time}") long max_age_secs) {
         this.MAX_AGE_SECS = max_age_secs;
     }
 
