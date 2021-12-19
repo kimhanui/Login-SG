@@ -9,7 +9,16 @@ public enum Role {
 
     private final String name;
 
-    Role(String name){
+    Role(String name) {
         this.name = name;
+    }
+
+    public static Role fromString(String name) {
+        for (Role r : values()) {
+            if (r.name.equals(name)) {
+                return r;
+            }
+        }
+        return null;
     }
 }

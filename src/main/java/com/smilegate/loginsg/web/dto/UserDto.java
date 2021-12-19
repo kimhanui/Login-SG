@@ -4,7 +4,6 @@ import com.smilegate.loginsg.domain.User;
 import lombok.*;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 
 /**
@@ -23,7 +22,7 @@ public class UserDto {
     @Email
     private String email;
 
-    @Max(10) @NotBlank
+    @NotBlank
     private String name;
 
     private String role;

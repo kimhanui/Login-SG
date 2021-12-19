@@ -6,9 +6,7 @@ import lombok.Getter;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
-/**
- * cf. login, find password
- */
+
 @AllArgsConstructor
 @Getter
 public class VerifyResponseDto {
@@ -17,7 +15,10 @@ public class VerifyResponseDto {
     private String email;
 
     @NotBlank
-    private String token;
+    private String accessToken;
+
+    @NotBlank
+    private String refreshToken;
 
     @NotBlank
     private String role;

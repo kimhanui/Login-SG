@@ -32,7 +32,7 @@ public class CustomFilterExceptionHandler extends OncePerRequestFilter {
         } catch (JwtValidationException e) {
             e.printStackTrace();
             setErrorResponse(e.getStatus(), response, e);
-        } catch (Throwable e) {
+        } catch (RuntimeException e) {
             e.printStackTrace();
             setErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, response, e);
         }

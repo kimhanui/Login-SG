@@ -11,7 +11,7 @@ import java.util.Random;
 
 @Slf4j
 @Service
-public class MailingServivce {
+public class MailingService {
 
     private final JavaMailSender mailSender;
     private static String FROM_ADDRESS;
@@ -19,25 +19,26 @@ public class MailingServivce {
     private Random random = new Random();
 
     @Autowired
-    public MailingServivce(JavaMailSender mailSender, @Value("${spring.mail.dev4kiki@gmail.com") String from) {
+    public MailingService(JavaMailSender mailSender, @Value("${spring.mail.dev4kiki@gmail.com") String from) {
         this.mailSender = mailSender;
         this.FROM_ADDRESS = from;
     }
 
-    public void sendMailForResetPW(String toAddress) {
+    public String sendMailForResetPW(String toAddress) throws RuntimeException{
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toAddress);
         message.setFrom(FROM_ADDRESS);
         message.setSubject(DEFAULT_SUBJECT);
-        message.setText(textTemplate(getRandom6code()));
+        String randomCode = getRandom6code();
+        message.setText(textTemplate(randomCode));
         mailSender.send(message);
+        return randomCode;
     }
 
     private String textTemplate(String resetCode) {
-        return String.format("<div>Hi, please verify your email" +
-                "<br>code: <span>%s</span>" +
-                "<br>Thank you." +
-                "</div>", resetCode);
+        return String.format("Hi, please verify your email" +
+                "\n\n\tcode: %s" +
+                "\n\nThank you.", resetCode);
     }
 
     private String getRandom6code() {
