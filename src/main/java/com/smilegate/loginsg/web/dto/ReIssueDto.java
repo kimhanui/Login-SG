@@ -10,14 +10,11 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @Setter
 @Getter
-public class RegisterRequestDto {
+public class ReIssueDto {
 
     @Email
     private String email;
 
     @NotBlank
-    private String password;
-
-    @NotBlank
-    private String name;
+    private String refreshToken;
 }

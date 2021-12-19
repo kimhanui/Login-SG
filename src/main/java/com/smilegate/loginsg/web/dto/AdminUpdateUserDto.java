@@ -1,23 +1,18 @@
 package com.smilegate.loginsg.web.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
-public class RegisterRequestDto {
-
-    @Email
-    private String email;
+public class AdminUpdateUserDto extends UserDto{
 
     @NotBlank
     private String password;
-
-    @NotBlank
-    private String name;
 }

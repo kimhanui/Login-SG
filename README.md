@@ -1,11 +1,25 @@
-## User Authentication
+# User Authentication
 
-아키텍쳐 설계
-- erd, uml(또는 프로덕트백로그), 아키텍처 설계
+## ERD 
+![image](https://user-images.githubusercontent.com/30483337/146680737-85747173-5ccb-42f9-b9e1-dd782c27f4e8.png)
 
-방어하고자했던 것 (보안. 주제가 인증이니까)
-- csrf, cors
+## 아키텍처 설계
+![image](https://user-images.githubusercontent.com/30483337/146684647-9e1df7f6-9e66-4e7b-a160-e96d0d419183.png)
 
-얻은 것
-- `SecurityConfig.java`의 security chain filter 의 구성을 다 이해했는가?
-- 에러핸들링(dispatcherServlet in, out), 에러 응답 format 통일
+
+## 개인 프로젝트 목표 & 수정된 것
+https://github.com/kimhanui/Login-SG/issues/8
+
+## 프로젝트 실행하기
+application-auth.yml 생성후, 아래 property를 채워주세요.
+```yaml
+jwt:
+  secret-key:         {here}
+  access-valid-time:  {here}
+  refresh-valid-time: {here}
+my:
+  mail:
+    sender:
+      username: {here}
+      password: {here}
+```
