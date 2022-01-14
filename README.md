@@ -2,6 +2,7 @@
 
 ## ERD 
 ![image](https://user-images.githubusercontent.com/30483337/146680737-85747173-5ccb-42f9-b9e1-dd782c27f4e8.png)
++ `wrong_cnt (tinyint)`
 
 ## 아키텍처 설계
 ![image](https://user-images.githubusercontent.com/30483337/146684647-9e1df7f6-9e66-4e7b-a160-e96d0d419183.png)
